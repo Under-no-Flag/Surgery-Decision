@@ -133,14 +133,14 @@ def admin_login():
 # --- Business Logic & APIs ---
 def calculate_risk(data, configs):
     logit_p = configs['base'] \
-            + configs['position'] * data.get('position', 0) \
-            + configs['surgery_level'] * data.get('surgery_level', 0) \
-            + configs['surgery_method'] * data.get('surgery_method', 0) \
-            + configs['bmi'] * data.get('bmi', 0) \
-            + configs['hypothermia'] * data.get('hypothermia', 0) \
-            + configs['albumin_abnormal'] * data.get('albumin_abnormal', 0) \
-            + configs['glucose_abnormal'] * data.get('glucose_abnormal', 0) \
-            + configs['surgery_time'] * data.get('surgery_time', 0)
+            + configs['position'] * float(data.get('position', 0)) \
+            + configs['surgery_level'] * float(data.get('surgery_level', 0)) \
+            + configs['surgery_method'] * float(data.get('surgery_method', 0)) \
+            + configs['bmi'] * float(data.get('bmi', 0)) \
+            + configs['hypothermia'] * float(data.get('hypothermia', 0)) \
+            + configs['albumin_abnormal'] * float(data.get('albumin_abnormal', 0)) \
+            + configs['glucose_abnormal'] * float(data.get('glucose_abnormal', 0)) \
+            + configs['surgery_time'] * float(data.get('surgery_time', 0))
 
     p = 1 / (1 + math.exp(-logit_p))
 

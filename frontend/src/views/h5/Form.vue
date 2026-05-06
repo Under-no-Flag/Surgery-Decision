@@ -10,7 +10,7 @@
           placeholder="请输入住院号"
           :rules="[{ required: true, message: '请填写住院号' }]"
         />
-        
+
         <van-field
           readonly
           clickable
@@ -66,7 +66,7 @@
             @cancel="showPicker.surgery_level = false"
           />
         </van-popup>
-        
+
         <van-field
           readonly
           clickable
@@ -139,7 +139,7 @@
         />
 
       </van-cell-group>
-      
+
       <div style="margin: 16px;">
         <van-button round block type="primary" native-type="submit" :loading="submitting">
           计算风险
