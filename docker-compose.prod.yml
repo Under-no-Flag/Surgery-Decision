@@ -29,8 +29,7 @@ services:
     container_name: surgery_frontend_prod
     restart: always
     ports:
-      - "80:80"
-      - "443:443" # 若配置了 SSL 证书可开放此端口
+      - "8088:80"
     depends_on:
       - backend
 
