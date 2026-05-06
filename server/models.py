@@ -1,5 +1,9 @@
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
+from datetime import datetime, timedelta
+
+# 获取中国时间(UTC+8)
+def get_beijing_time():
+    return datetime.utcnow() + timedelta(hours=8)
 
 db = SQLAlchemy()
 
@@ -12,7 +16,7 @@ class User(db.Model):
     username = db.Column(db.String(100), unique=True, nullable=True) # for admin
     password_hash = db.Column(db.String(255), nullable=True)
     is_admin = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=get_beijing_time)
 
 class Record(db.Model):
     __tablename__ = 'records'
@@ -36,7 +40,7 @@ class Record(db.Model):
     p_value = db.Column(db.Float)
     risk_level = db.Column(db.String(20)) # 低风险, 中风险, 高风险
 
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=get_beijing_time)
 
     user = db.relationship('User', backref=db.backref('records', lazy=True))
 
