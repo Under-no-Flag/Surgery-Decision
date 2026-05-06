@@ -6,7 +6,7 @@ import { createPinia } from 'pinia'
 
 // Vant
 import 'vant/lib/index.css';
-import { Button, Field, CellGroup, Form, Picker, Popup, NavBar, Tabbar, TabbarItem, RadioGroup, Radio } from 'vant';
+import { Button, Field, CellGroup, Form, Picker, Popup, NavBar, Tabbar, TabbarItem, RadioGroup, Radio, Cell, Collapse, CollapseItem } from 'vant';
 
 // Element Plus
 import ElementPlus from 'element-plus'
@@ -28,6 +28,10 @@ app.use(NavBar)
 app.use(Tabbar)
 app.use(TabbarItem)
 app.use(RadioGroup)
+app.use(Radio)
+app.use(Cell)
+app.use(Collapse)
+app.use(CollapseItem)
 app.use(Radio)
 
 app.use(ElementPlus)

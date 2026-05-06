@@ -81,7 +81,9 @@ def wechat_login():
 
     # Get user info
     user_info_url = f"https://api.weixin.qq.com/sns/userinfo?access_token={access_token}&openid={openid}&lang=zh_CN"
-    user_info = requests.get(user_info_url).json()
+    user_info_res = requests.get(user_info_url)
+    user_info_res.encoding = 'utf-8'
+    user_info = user_info_res.json()
 
     user = User.query.filter_by(openid=openid).first()
     if not user:
@@ -208,6 +210,18 @@ def get_my_records(current_user):
     return jsonify([{
         "id": r.id,
         "hospital_no": r.hospital_no,
+        "postop_skin": r.postop_skin,
+        "position": r.position,
+        "surgery_level": r.surgery_level,
+        "surgery_method": r.surgery_method,
+        "height": r.height,
+        "weight": r.weight,
+        "bmi": r.bmi,
+        "hypothermia": r.hypothermia,
+        "glucose_abnormal": r.glucose_abnormal,
+        "albumin_abnormal": r.albumin_abnormal,
+        "surgery_time": r.surgery_time,
+        "p_value": r.p_value,
         "risk_level": r.risk_level,
         "created_at": r.created_at.strftime('%Y-%m-%d %H:%M:%S')
     } for r in records])
@@ -242,6 +256,18 @@ def get_all_records(admin_user):
         results.append({
             "id": r.id,
             "hospital_no": r.hospital_no,
+            "postop_skin": r.postop_skin,
+            "position": r.position,
+            "surgery_level": r.surgery_level,
+            "surgery_method": r.surgery_method,
+            "height": r.height,
+            "weight": r.weight,
+            "bmi": r.bmi,
+            "hypothermia": r.hypothermia,
+            "glucose_abnormal": r.glucose_abnormal,
+            "albumin_abnormal": r.albumin_abnormal,
+            "surgery_time": r.surgery_time,
+            "p_value": r.p_value,
             "risk_level": r.risk_level,
             "user": r.user.nickname if r.user else 'Unknown',
             "created_at": r.created_at.strftime('%Y-%m-%d %H:%M:%S')

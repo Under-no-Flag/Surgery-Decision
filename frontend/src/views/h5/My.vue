@@ -9,13 +9,31 @@
     </div>
     
     <van-cell-group title="我的录入记录" class="record-list">
-      <van-cell 
-        v-for="item in records" 
-        :key="item.id" 
-        :title="'住院号: ' + item.hospital_no" 
-        :label="item.created_at"
-        :value="item.risk_level"
-      />
+      <van-collapse v-model="activeNames">
+        <van-collapse-item 
+          v-for="item in records" 
+          :key="item.id" 
+          :name="item.id"
+          :title="'住院号: ' + item.hospital_no" 
+          :label="item.created_at"
+          :value="item.risk_level"
+        >
+          <div class="record-detail">
+            <p><strong>术后皮肤情况:</strong> {{ formatSkin(item.postop_skin) }}</p>
+            <p><strong>术中体位:</strong> {{ formatPosition(item.position) }}</p>
+            <p><strong>手术等级:</strong> {{ formatLevel(item.surgery_level) }}</p>
+            <p><strong>手术方式:</strong> {{ formatMethod(item.surgery_method) }}</p>
+            <p><strong>身高(m):</strong> {{ item.height }}</p>
+            <p><strong>体重(kg):</strong> {{ item.weight }}</p>
+            <p><strong>BMI:</strong> {{ item.bmi }}</p>
+            <p><strong>诱导期低体温:</strong> {{ item.hypothermia ? '<36°C' : '≥36°C' }}</p>
+            <p><strong>葡萄糖异常:</strong> {{ item.glucose_abnormal ? '异常' : '正常' }}</p>
+            <p><strong>白蛋白异常:</strong> {{ item.albumin_abnormal ? '异常' : '正常' }}</p>
+            <p><strong>手术时间(分):</strong> {{ item.surgery_time }}</p>
+            <p><strong>计算风险值(P):</strong> {{ (item.p_value * 100).toFixed(2) }}%</p>
+          </div>
+        </van-collapse-item>
+      </van-collapse>
       <div v-if="records.length === 0" class="empty">暂无记录</div>
     </van-cell-group>
 
@@ -38,6 +56,12 @@ import api from '../../utils/api'
 const router = useRouter()
 const user = ref(JSON.parse(localStorage.getItem('user') || '{}'))
 const records = ref([])
+const activeNames = ref([])
+
+const formatSkin = (v) => ({1: '压红', 2: '一期', 3: '二期', 4: '其他'})[v] || '未知';
+const formatPosition = (v) => ({1: '中转体位', 2: '侧卧位', 3: '俯卧位', 4: '仰卧位', 5: '截石位'})[v] || '未知';
+const formatLevel = (v) => ({1: '四级', 2: '三级', 3: '一级或二级'})[v] || '未知';
+const formatMethod = (v) => ({1: '中转开腹', 2: '开腹', 3: '浅表或深部组织', 4: '微创(腔镜)'})[v] || '未知';
 
 onMounted(async () => {
   try {
@@ -85,5 +109,13 @@ const logout = () => {
   padding: 20px;
   text-align: center;
   color: #999;
+}
+.record-detail p {
+  margin: 5px 0;
+  color: #666;
+  font-size: 14px;
+}
+.record-detail strong {
+  color: #333;
 }
 </style>
