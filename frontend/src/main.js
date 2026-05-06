@@ -32,6 +32,11 @@ app.use(Radio)
 app.use(Cell)
 app.use(Collapse)
 app.use(CollapseItem)
+import { Dialog, Toast } from 'vant';
+import 'vant/es/dialog/style';
+import 'vant/es/toast/style';
+app.use(Dialog);
+app.use(Toast);
 app.use(Radio)
 
 app.use(ElementPlus)

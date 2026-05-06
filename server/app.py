@@ -226,6 +226,16 @@ def get_my_records(current_user):
         "created_at": r.created_at.strftime('%Y-%m-%d %H:%M:%S')
     } for r in records])
 
+@app.route('/api/records/<int:record_id>', methods=['DELETE'])
+@token_required
+def delete_record(current_user, record_id):
+    record = Record.query.filter_by(id=record_id, user_id=current_user.id).first()
+    if not record:
+        return jsonify({"error": "Record not found"}), 404
+    db.session.delete(record)
+    db.session.commit()
+    return jsonify({"status": "success"})
+
 # --- Admin APIs ---
 @app.route('/api/admin/configs', methods=['GET'])
 @admin_required
@@ -273,6 +283,16 @@ def get_all_records(admin_user):
             "created_at": r.created_at.strftime('%Y-%m-%d %H:%M:%S')
         })
     return jsonify(results)
+
+@app.route('/api/admin/records/<int:record_id>', methods=['DELETE'])
+@admin_required
+def delete_admin_record(admin_user, record_id):
+    record = Record.query.get(record_id)
+    if not record:
+        return jsonify({"error": "Record not found"}), 404
+    db.session.delete(record)
+    db.session.commit()
+    return jsonify({"status": "success"})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

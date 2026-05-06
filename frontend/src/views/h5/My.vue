@@ -31,6 +31,9 @@
             <p><strong>白蛋白异常:</strong> {{ item.albumin_abnormal ? '异常' : '正常' }}</p>
             <p><strong>手术时间(分):</strong> {{ item.surgery_time }}</p>
             <p><strong>计算风险值(P):</strong> {{ (item.p_value * 100).toFixed(2) }}%</p>
+            <div style="text-align: right; margin-top: 10px;">
+              <van-button size="small" type="danger" @click.stop="deleteRecord(item.id)">删除记录</van-button>
+            </div>
           </div>
         </van-collapse-item>
       </van-collapse>
@@ -51,6 +54,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { showConfirmDialog, showToast } from 'vant'
 import api from '../../utils/api'
 
 const router = useRouter()
@@ -64,10 +68,31 @@ const formatLevel = (v) => ({1: '四级', 2: '三级', 3: '一级或二级'})[v]
 const formatMethod = (v) => ({1: '中转开腹', 2: '开腹', 3: '浅表或深部组织', 4: '微创(腔镜)'})[v] || '未知';
 
 onMounted(async () => {
+  fetchRecords()
+})
+
+const fetchRecords = async () => {
   try {
     records.value = await api.get('/records/my')
   } catch (e) {}
-})
+}
+
+const deleteRecord = (id) => {
+  showConfirmDialog({
+    title: '删除记录',
+    message: '确定要删除这条评估记录吗？',
+  }).then(async () => {
+    try {
+      await api.delete(`/records/${id}`)
+      showToast('删除成功')
+      fetchRecords()
+    } catch (e) {
+      showToast('删除失败')
+    }
+  }).catch(() => {
+    // on cancel
+  });
+}
 
 const logout = () => {
   localStorage.removeItem('token')

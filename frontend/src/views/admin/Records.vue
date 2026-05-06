@@ -34,6 +34,15 @@
           </template>
         </el-table-column>
         <el-table-column prop="created_at" label="录入时间" />
+        <el-table-column label="操作" width="120">
+          <template #default="{ row }">
+            <el-popconfirm title="确定要删除这条记录吗？" @confirm="deleteRecord(row.id)">
+              <template #reference>
+                <el-button type="danger" size="small">删除</el-button>
+              </template>
+            </el-popconfirm>
+          </template>
+        </el-table-column>
       </el-table>
     </el-card>
   </div>
@@ -41,6 +50,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { ElMessage } from 'element-plus'
 import api from '../../utils/api'
 // 生产环境可使用 xlsx 库在前端导出或者请求后端的导出接口
 import * as XLSX from 'xlsx'
@@ -71,6 +81,16 @@ const getRiskType = (level) => {
   if (level === '中风险') return 'warning'
   if (level === '高风险') return 'danger'
   return 'info'
+}
+
+const deleteRecord = async (id) => {
+  try {
+    await api.delete(`/admin/records/${id}`)
+    ElMessage.success('删除成功')
+    fetchData()
+  } catch (error) {
+    ElMessage.error('删除失败')
+  }
 }
 
 const exportExcel = () => {
