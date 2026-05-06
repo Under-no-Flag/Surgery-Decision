@@ -15,7 +15,7 @@
           readonly
           clickable
           name="postop_skin"
-          :value="columns.postop_skin.find(item => item.value === formData.postop_skin)?.text"
+          :model-value="columns.postop_skin.find(item => item.value === formData.postop_skin)?.text"
           label="术后皮肤情况"
           placeholder="点击选择术后皮肤情况"
           @click="showPicker.postop_skin = true"
@@ -35,7 +35,7 @@
           readonly
           clickable
           name="position"
-          :value="columns.position.find(item => item.value === formData.position)?.text"
+          :model-value="columns.position.find(item => item.value === formData.position)?.text"
           label="术中体位"
           placeholder="点击选择"
           @click="showPicker.position = true"
@@ -53,7 +53,7 @@
           readonly
           clickable
           name="surgery_level"
-          :value="columns.surgery_level.find(item => item.value === formData.surgery_level)?.text"
+          :model-value="columns.surgery_level.find(item => item.value === formData.surgery_level)?.text"
           label="手术等级"
           placeholder="点击选择"
           @click="showPicker.surgery_level = true"
@@ -71,7 +71,7 @@
           readonly
           clickable
           name="surgery_method"
-          :value="columns.surgery_method.find(item => item.value === formData.surgery_method)?.text"
+          :model-value="columns.surgery_method.find(item => item.value === formData.surgery_method)?.text"
           label="手术方式"
           placeholder="点击选择"
           @click="showPicker.surgery_method = true"
