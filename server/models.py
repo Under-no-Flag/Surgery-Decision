@@ -24,7 +24,6 @@ class Record(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
     hospital_no = db.Column(db.String(50), nullable=False)
-    postop_skin = db.Column(db.Integer) # 1:压红, 2:一期, 3:二期, 4:其他
 
     position = db.Column(db.Integer)
     surgery_level = db.Column(db.Integer)
@@ -33,8 +32,11 @@ class Record(db.Model):
     weight = db.Column(db.Float)
     bmi = db.Column(db.Float)
     hypothermia = db.Column(db.Integer)
+    temperature = db.Column(db.Float)
     glucose_abnormal = db.Column(db.Integer)
+    glucose = db.Column(db.Float)
     albumin_abnormal = db.Column(db.Integer)
+    albumin = db.Column(db.Float)
     surgery_time = db.Column(db.Integer)
 
     p_value = db.Column(db.Float)

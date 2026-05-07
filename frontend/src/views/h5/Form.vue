@@ -10,24 +10,6 @@
           placeholder="请输入住院号"
           :rules="[{ required: true, message: '请填写住院号' }]"
         />
-
-        <van-field
-          readonly
-          clickable
-          name="postop_skin"
-          :model-value="columns.postop_skin.find(item => item.value === formData.postop_skin)?.text"
-          label="术后皮肤情况"
-          placeholder="点击选择术后皮肤情况"
-          @click="showPicker.postop_skin = true"
-          :rules="[{ required: true, message: '请选择皮肤情况' }]"
-        />
-        <van-popup v-model:show="showPicker.postop_skin" position="bottom">
-          <van-picker
-            :columns="columns.postop_skin"
-            @confirm="onConfirm('postop_skin', $event)"
-            @cancel="showPicker.postop_skin = false"
-          />
-        </van-popup>
       </van-cell-group>
 
       <van-cell-group inset title="评估指标">
@@ -87,56 +69,59 @@
 
         <van-field
           v-model="formData.height"
-          type="number"
+          type="digit"
           name="height"
-          label="身高 (米)"
-          placeholder="例如 1.75"
+          placeholder="例如 175"
           :rules="[{ required: true, message: '请填写身高' }]"
-        />
+        >
+          <template #label>身高 <span style="color: red;">(厘米)</span></template>
+        </van-field>
         <van-field
           v-model="formData.weight"
           type="number"
           name="weight"
-          label="体重 (KG)"
           placeholder="例如 65"
           :rules="[{ required: true, message: '请填写体重' }]"
+        >
+          <template #label>体重 <span style="color: red;">(KG)</span></template>
+        </van-field>
+
+        <van-field
+          v-model="formData.temperature"
+          type="number"
+          name="temperature"
+          label="诱导期低体温(℃)"
+          placeholder="请填写体温"
+          :rules="[{ required: true, message: '请填写体温' }]"
         />
 
-        <van-field name="hypothermia" label="诱导期低体温">
-          <template #input>
-            <van-radio-group v-model="formData.hypothermia" direction="horizontal">
-              <van-radio :name="0">≥36°C</van-radio>
-              <van-radio :name="1"><36°C</van-radio>
-            </van-radio-group>
-          </template>
-        </van-field>
+        <van-field
+          v-model="formData.glucose"
+          type="number"
+          name="glucose"
+          label="葡萄糖(mmol/L)"
+          placeholder="请填写葡萄糖"
+          :rules="[{ required: true, message: '请填写葡萄糖' }]"
+        />
 
-        <van-field name="glucose_abnormal" label="葡萄糖异常">
-          <template #input>
-            <van-radio-group v-model="formData.glucose_abnormal" direction="horizontal">
-              <van-radio :name="0">正常 (3.88-6.11)</van-radio>
-              <van-radio :name="1">异常 (<3.88或>6.11)</van-radio>
-            </van-radio-group>
-          </template>
-        </van-field>
-
-        <van-field name="albumin_abnormal" label="白蛋白异常">
-          <template #input>
-            <van-radio-group v-model="formData.albumin_abnormal" direction="horizontal">
-              <van-radio :name="0">正常 (40-55)</van-radio>
-              <van-radio :name="1">异常 (<40或>55)</van-radio>
-            </van-radio-group>
-          </template>
-        </van-field>
+        <van-field
+          v-model="formData.albumin"
+          type="number"
+          name="albumin"
+          label="白蛋白(g/L)"
+          placeholder="请填写白蛋白"
+          :rules="[{ required: true, message: '请填写白蛋白' }]"
+        />
 
         <van-field
           v-model="formData.surgery_time"
           type="digit"
           name="surgery_time"
-          label="预计手术时间(分)"
           placeholder="请输入预计手术时间"
           :rules="[{ required: true, message: '请填写手术时间' }]"
-        />
+        >
+          <template #label>预计手术时间<span style="color: red;">(分)</span></template>
+        </van-field>
 
       </van-cell-group>
 
@@ -164,34 +149,26 @@ const submitting = ref(false)
 
 const getInitialData = () => ({
   hospital_no: '',
-  postop_skin: '',
   position: '',
   surgery_level: '',
   surgery_method: '',
   height: '',
   weight: '',
-  hypothermia: 0,
-  glucose_abnormal: 0,
-  albumin_abnormal: 0,
+  temperature: '',
+  glucose: '',
+  albumin: '',
   surgery_time: ''
 })
 
 const formData = reactive(getInitialData())
 
 const showPicker = reactive({
-  postop_skin: false,
   position: false,
   surgery_level: false,
   surgery_method: false
 })
 
 const columns = {
-  postop_skin: [
-    { text: '压红', value: 1 },
-    { text: '一期压力性损伤', value: 2 },
-    { text: '二期压力性损伤', value: 3 },
-    { text: '其他', value: 4 }
-  ],
   position: [
     { text: '中转体位', value: 1 },
     { text: '侧卧位', value: 2 },

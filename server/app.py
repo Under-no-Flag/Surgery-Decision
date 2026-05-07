@@ -170,8 +170,33 @@ def create_record(current_user):
     # Calculate BMI
     weight = float(data.get('weight', 0))
     height = float(data.get('height', 0))
-    bmi = weight / (height ** 2) if height > 0 else 0
+    bmi = weight / ((height / 100) ** 2) if height > 0 else 0
     data['bmi'] = bmi
+
+    # Calculate indicators based on raw input
+    temperature = data.get('temperature')
+    if temperature is not None and str(temperature).strip() != '':
+        temperature = float(temperature)
+        data['hypothermia'] = 0 if temperature >= 36 else 1
+    else:
+        temperature = None
+        data['hypothermia'] = 0
+
+    glucose = data.get('glucose')
+    if glucose is not None and str(glucose).strip() != '':
+        glucose = float(glucose)
+        data['glucose_abnormal'] = 0 if 3.88 <= glucose <= 6.11 else 1
+    else:
+        glucose = None
+        data['glucose_abnormal'] = 0
+
+    albumin = data.get('albumin')
+    if albumin is not None and str(albumin).strip() != '':
+        albumin = float(albumin)
+        data['albumin_abnormal'] = 0 if 40 <= albumin <= 55 else 1
+    else:
+        albumin = None
+        data['albumin_abnormal'] = 0
 
     # Calculate risk
     p_value, risk_level, suggestion = calculate_risk(data, configs)
@@ -179,7 +204,6 @@ def create_record(current_user):
     record = Record(
         user_id=current_user.id,
         hospital_no=data['hospital_no'],
-        postop_skin=data.get('postop_skin'),
         position=data.get('position'),
         surgery_level=data.get('surgery_level'),
         surgery_method=data.get('surgery_method'),
@@ -187,8 +211,11 @@ def create_record(current_user):
         weight=weight,
         bmi=bmi,
         hypothermia=data.get('hypothermia'),
+        temperature=temperature,
         glucose_abnormal=data.get('glucose_abnormal'),
+        glucose=glucose,
         albumin_abnormal=data.get('albumin_abnormal'),
+        albumin=albumin,
         surgery_time=data.get('surgery_time'),
         p_value=p_value,
         risk_level=risk_level
@@ -210,7 +237,6 @@ def get_my_records(current_user):
     return jsonify([{
         "id": r.id,
         "hospital_no": r.hospital_no,
-        "postop_skin": r.postop_skin,
         "position": r.position,
         "surgery_level": r.surgery_level,
         "surgery_method": r.surgery_method,
@@ -218,8 +244,11 @@ def get_my_records(current_user):
         "weight": r.weight,
         "bmi": r.bmi,
         "hypothermia": r.hypothermia,
+        "temperature": r.temperature,
         "glucose_abnormal": r.glucose_abnormal,
+        "glucose": r.glucose,
         "albumin_abnormal": r.albumin_abnormal,
+        "albumin": r.albumin,
         "surgery_time": r.surgery_time,
         "p_value": r.p_value,
         "risk_level": r.risk_level,
@@ -266,7 +295,6 @@ def get_all_records(admin_user):
         results.append({
             "id": r.id,
             "hospital_no": r.hospital_no,
-            "postop_skin": r.postop_skin,
             "position": r.position,
             "surgery_level": r.surgery_level,
             "surgery_method": r.surgery_method,
@@ -274,8 +302,11 @@ def get_all_records(admin_user):
             "weight": r.weight,
             "bmi": r.bmi,
             "hypothermia": r.hypothermia,
+            "temperature": r.temperature,
             "glucose_abnormal": r.glucose_abnormal,
+            "glucose": r.glucose,
             "albumin_abnormal": r.albumin_abnormal,
+            "albumin": r.albumin,
             "surgery_time": r.surgery_time,
             "p_value": r.p_value,
             "risk_level": r.risk_level,
