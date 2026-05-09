@@ -150,7 +150,7 @@ def calculate_risk(data, configs):
     if p_percent < 30:
         level = "低风险"
         suggestion = configs.get('suggestion_low', '')
-    elif p_percent <= 48:
+    elif p_percent <= 60:
         level = "中风险"
         suggestion = configs.get('suggestion_medium', '')
     else:

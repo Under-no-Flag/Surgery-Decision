@@ -16,10 +16,10 @@
               <el-descriptions-item label="身高(cm)">{{ row.height }}</el-descriptions-item>
               <el-descriptions-item label="体重(kg)">{{ row.weight }}</el-descriptions-item>
               <el-descriptions-item label="BMI">{{ typeof row.bmi === 'number' ? row.bmi.toFixed(2) : row.bmi }}</el-descriptions-item>
-              <el-descriptions-item label="诱导期低体温(℃)">{{ row.temperature }}</el-descriptions-item>
-              <el-descriptions-item label="葡萄糖(mmol/L)">{{ row.glucose }}</el-descriptions-item>
-              <el-descriptions-item label="白蛋白(g/L)">{{ row.albumin }}</el-descriptions-item>
-              <el-descriptions-item label="手术时间(分)">{{ row.surgery_time }}</el-descriptions-item>
+              <el-descriptions-item label="麻醉诱导时体温(℃)">{{ row.temperature }}</el-descriptions-item>
+              <el-descriptions-item label="术前葡萄糖(mmol/L)">{{ row.glucose }}</el-descriptions-item>
+              <el-descriptions-item label="术前白蛋白(g/L)">{{ row.albumin }}</el-descriptions-item>
+              <el-descriptions-item label="手术时间(小时)">{{ row.surgery_time ? (row.surgery_time / 60).toFixed(1) : '' }}</el-descriptions-item>
               <el-descriptions-item label="计算风险值(P)">{{ row.p_value != null ? (row.p_value * 100).toFixed(2) + '%' : '-' }}</el-descriptions-item>
             </el-descriptions>
           </template>
@@ -105,10 +105,10 @@ const exportExcel = () => {
     '身高(cm)': r.height,
     '体重(kg)': r.weight,
     'BMI': r.bmi,
-    '诱导期低体温(℃)': r.temperature,
-    '葡萄糖(mmol/L)': r.glucose,
-    '白蛋白(g/L)': r.albumin,
-    '手术时间(分)': r.surgery_time,
+    '麻醉诱导时体温(℃)': r.temperature,
+    '术前葡萄糖(mmol/L)': r.glucose,
+    '术前白蛋白(g/L)': r.albumin,
+    '手术时间(小时)': r.surgery_time ? (r.surgery_time / 60).toFixed(1) : '',
     '录入时间': r.created_at
   })))
   const wb = XLSX.utils.book_new()

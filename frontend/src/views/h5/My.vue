@@ -25,10 +25,10 @@
             <p><strong>身高(cm):</strong> {{ item.height }}</p>
             <p><strong>体重(kg):</strong> {{ item.weight }}</p>
             <p><strong>BMI:</strong> {{ typeof item.bmi === 'number' ? item.bmi.toFixed(2) : item.bmi }}</p>
-            <p><strong>诱导期低体温(℃):</strong> {{ item.temperature }}</p>
-            <p><strong>葡萄糖(mmol/L):</strong> {{ item.glucose }}</p>
-            <p><strong>白蛋白(g/L):</strong> {{ item.albumin }}</p>
-            <p><strong>手术时间(分):</strong> {{ item.surgery_time }}</p>
+            <p><strong>麻醉诱导时体温(℃):</strong> {{ item.temperature }}</p>
+            <p><strong>术前葡萄糖(mmol/L):</strong> {{ item.glucose }}</p>
+            <p><strong>术前白蛋白(g/L):</strong> {{ item.albumin }}</p>
+            <p><strong>手术时间(小时):</strong> {{ item.surgery_time ? (item.surgery_time / 60).toFixed(1) : '' }}</p>
             <p><strong>计算风险值(P):</strong> {{ (item.p_value * 100).toFixed(2) }}%</p>
             <div style="text-align: right; margin-top: 10px;">
               <van-button size="small" type="danger" @click.stop="deleteRecord(item.id)">删除记录</van-button>

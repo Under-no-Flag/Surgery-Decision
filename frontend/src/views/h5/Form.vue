@@ -90,7 +90,7 @@
           v-model="formData.temperature"
           type="number"
           name="temperature"
-          label="诱导期低体温(℃)"
+          label="麻醉诱导时体温(℃)"
           placeholder="请填写体温"
           :rules="[{ required: true, message: '请填写体温' }]"
         />
@@ -99,7 +99,7 @@
           v-model="formData.glucose"
           type="number"
           name="glucose"
-          label="葡萄糖(mmol/L)"
+          label="术前葡萄糖(mmol/L)"
           placeholder="请填写葡萄糖"
           :rules="[{ required: true, message: '请填写葡萄糖' }]"
         />
@@ -108,19 +108,19 @@
           v-model="formData.albumin"
           type="number"
           name="albumin"
-          label="白蛋白(g/L)"
+          label="术前白蛋白(g/L)"
           placeholder="请填写白蛋白"
           :rules="[{ required: true, message: '请填写白蛋白' }]"
         />
 
         <van-field
           v-model="formData.surgery_time"
-          type="digit"
+          type="number"
           name="surgery_time"
           placeholder="请输入预计手术时间"
           :rules="[{ required: true, message: '请填写手术时间' }]"
         >
-          <template #label>预计手术时间<span style="color: red;">(分)</span></template>
+          <template #label>预计手术时间<span style="color: red;">(小时)</span></template>
         </van-field>
 
       </van-cell-group>
@@ -197,7 +197,11 @@ const onConfirm = (field, { selectedOptions }) => {
 const onSubmit = async () => {
   submitting.value = true
   try {
-    const res = await api.post('/records', formData)
+    const payload = { ...formData }
+    if (payload.surgery_time) {
+      payload.surgery_time = Math.round(parseFloat(payload.surgery_time) * 60)
+    }
+    const res = await api.post('/records', payload)
     Object.assign(formData, getInitialData()) // Clean up for next time
     router.push({ name: 'H5Result', query: { risk_level: res.risk_level, suggestion: res.suggestion } })
   } finally {
