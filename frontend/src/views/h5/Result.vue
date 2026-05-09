@@ -1,7 +1,7 @@
 <template>
   <div class="result-container">
     <van-nav-bar title="风险评估结果" left-arrow @click-left="goBack" />
-    
+
     <div class="result-box" :class="riskClass">
       <h2>{{ riskLevel }}</h2>
       <p class="suggestion-title">护理建议：</p>
@@ -9,7 +9,7 @@
         {{ suggestion }}
       </div>
     </div>
-    
+
     <div style="margin: 30px 16px;">
       <van-button round block type="primary" @click="goBack">返回继续录入</van-button>
     </div>
@@ -63,5 +63,8 @@ const goBack = () => {
   font-size: 14px;
   color: #333;
   line-height: 1.6;
+  word-wrap: break-word;
+  word-break: break-all;
+  white-space: pre-wrap;
 }
 </style>
