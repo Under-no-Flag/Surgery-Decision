@@ -33,8 +33,8 @@ def health():
     return jsonify({"status": "ok"})
 
 # WeChat Configuration
-WX_APPID = 'wxc5a52858b6e385f9'
-WX_SECRET = 'e77ed3c3dc89e5b4a171669fda7d5326'
+WX_APPID = 'wx447816e4e2d99865'
+WX_SECRET = '8ea94a5f8449a80959bfead8a545a5ff'
 
 # --- Middleware / Helpers ---
 def token_required(f):

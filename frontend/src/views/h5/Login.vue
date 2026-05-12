@@ -19,7 +19,7 @@ const router = useRouter()
 const route = useRoute()
 const isWechatCallback = ref(false)
 
-const appId = 'wxc5a52858b6e385f9'
+const appId = 'wx447816e4e2d99865'
 
 onMounted(() => {
   const code = route.query.code
