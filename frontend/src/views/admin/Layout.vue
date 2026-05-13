@@ -14,6 +14,10 @@
           <el-icon><Document /></el-icon>
           <span>记录管理</span>
         </el-menu-item>
+        <el-menu-item index="/admin/users">
+          <el-icon><User /></el-icon>
+          <span>用户管理</span>
+        </el-menu-item>
         <el-menu-item index="/admin/settings">
           <el-icon><Setting /></el-icon>
           <span>系统设置 (公式配置)</span>
@@ -35,7 +39,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Document, Setting } from '@element-plus/icons-vue'
+import { Document, Setting, User } from '@element-plus/icons-vue'
 
 const route = useRoute()
 const router = useRouter()

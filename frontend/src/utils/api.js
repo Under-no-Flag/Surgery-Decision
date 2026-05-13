@@ -8,8 +8,8 @@ const api = axios.create({
 })
 
 api.interceptors.request.use(config => {
-  // Try getting token from H5 or Admin
-  const token = localStorage.getItem('token') || localStorage.getItem('adminToken')
+  const isAdminApi = config.url?.startsWith('/admin')
+  const token = isAdminApi ? localStorage.getItem('adminToken') : localStorage.getItem('token')
   if (token) {
     config.headers['Authorization'] = token
   }

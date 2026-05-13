@@ -6,6 +6,7 @@ import requests
 import math
 from datetime import datetime
 from functools import wraps
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 # Configurations
@@ -37,6 +38,50 @@ WX_APPID = 'wx447816e4e2d99865'
 WX_SECRET = '8ea94a5f8449a80959bfead8a545a5ff'
 
 # --- Middleware / Helpers ---
+def validate_username(username):
+    username = (username or '').strip()
+    if len(username) < 3 or len(username) > 50:
+        return None, "账号长度需为 3-50 个字符"
+    return username, None
+
+def validate_password(password):
+    password = password or ''
+    if len(password) < 6 or len(password) > 128:
+        return "密码长度需为 6-128 个字符"
+    return None
+
+def verify_password(user, password):
+    if not user or not user.password_hash or password is None:
+        return False
+
+    try:
+        if check_password_hash(user.password_hash, password):
+            return True
+    except ValueError:
+        # Legacy rows may contain plaintext passwords from older versions.
+        pass
+
+    if user.password_hash == password:
+        user.password_hash = generate_password_hash(password)
+        db.session.commit()
+        return True
+
+    return False
+
+def serialize_user(user, include_admin_fields=False):
+    data = {
+        "id": user.id,
+        "username": user.username,
+        "nickname": user.nickname,
+        "avatar": user.avatar,
+        "is_admin": user.is_admin,
+        "created_at": user.created_at.strftime('%Y-%m-%d %H:%M:%S') if user.created_at else None
+    }
+    if include_admin_fields:
+        data["openid"] = user.openid
+        data["record_count"] = Record.query.filter_by(user_id=user.id).count()
+    return data
+
 def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -60,6 +105,55 @@ def admin_required(f):
             return jsonify({"error": "Admin privileges required"}), 403
         return f(user, *args, **kwargs)
     return decorated
+
+# --- Account Login / Register ---
+@app.route('/api/auth/register', methods=['POST'])
+def register():
+    data = request.json or {}
+    username, username_error = validate_username(data.get('username'))
+    if username_error:
+        return jsonify({"error": username_error}), 400
+
+    password_error = validate_password(data.get('password'))
+    if password_error:
+        return jsonify({"error": password_error}), 400
+
+    if User.query.filter_by(username=username).first():
+        return jsonify({"error": "账号已存在"}), 409
+
+    user = User(
+        username=username,
+        password_hash=generate_password_hash(data.get('password')),
+        nickname=(data.get('nickname') or username).strip(),
+        is_admin=False
+    )
+    db.session.add(user)
+    db.session.commit()
+
+    return jsonify({
+        "token": str(user.id),
+        "user": serialize_user(user)
+    })
+
+@app.route('/api/auth/login', methods=['POST'])
+def login():
+    data = request.json or {}
+    username = (data.get('username') or '').strip()
+    password = data.get('password')
+
+    user = User.query.filter_by(username=username).first()
+    if not verify_password(user, password):
+        return jsonify({"error": "账号或密码错误"}), 401
+
+    return jsonify({
+        "token": str(user.id),
+        "user": serialize_user(user)
+    })
+
+@app.route('/api/auth/me', methods=['GET'])
+@token_required
+def get_current_user(current_user):
+    return jsonify(serialize_user(current_user))
 
 # --- Wechat Login & Users ---
 @app.route('/api/wechat/login', methods=['POST'])
@@ -101,35 +195,36 @@ def wechat_login():
 
     return jsonify({
         "token": str(user.id),
-        "user": {
-            "id": user.id,
-            "nickname": user.nickname,
-            "avatar": user.avatar
-        }
+        "user": serialize_user(user)
     })
 
 # --- Admin Login ---
 @app.route('/api/admin/login', methods=['POST'])
 def admin_login():
-    data = request.json
-    username = data.get('username')
-    password = data.get('password') # simplified, should check hash
+    data = request.json or {}
+    username = (data.get('username') or '').strip()
+    password = data.get('password')
 
-    user = User.query.filter_by(username=username, password_hash=password, is_admin=True).first()
-    if not user:
+    user = User.query.filter_by(username=username, is_admin=True).first()
+    if not verify_password(user, password):
         # For testing: auto create admin if none exists and trying to login with admin/admin
         if username == 'admin' and password == 'admin':
             if not User.query.filter_by(username='admin').first():
-                user = User(username='admin', password_hash='admin', is_admin=True, nickname='Administrator')
+                user = User(
+                    username='admin',
+                    password_hash=generate_password_hash('admin'),
+                    is_admin=True,
+                    nickname='Administrator'
+                )
                 db.session.add(user)
                 db.session.commit()
-                return jsonify({"token": str(user.id), "user": {"id": user.id, "nickname": user.nickname}})
+                return jsonify({"token": str(user.id), "user": serialize_user(user)})
 
-        return jsonify({"error": "Invalid credentials"}), 401
+        return jsonify({"error": "账号或密码错误"}), 401
 
     return jsonify({
         "token": str(user.id),
-        "user": {"id": user.id, "nickname": user.nickname}
+        "user": serialize_user(user)
     })
 
 # --- Business Logic & APIs ---
@@ -322,6 +417,96 @@ def delete_admin_record(admin_user, record_id):
     if not record:
         return jsonify({"error": "Record not found"}), 404
     db.session.delete(record)
+    db.session.commit()
+    return jsonify({"status": "success"})
+
+@app.route('/api/admin/users', methods=['GET'])
+@admin_required
+def get_users(admin_user):
+    users = User.query.order_by(User.created_at.desc()).all()
+    return jsonify([serialize_user(user, include_admin_fields=True) for user in users])
+
+@app.route('/api/admin/users', methods=['POST'])
+@admin_required
+def create_user(admin_user):
+    data = request.json or {}
+    username, username_error = validate_username(data.get('username'))
+    if username_error:
+        return jsonify({"error": username_error}), 400
+
+    password_error = validate_password(data.get('password'))
+    if password_error:
+        return jsonify({"error": password_error}), 400
+
+    if User.query.filter_by(username=username).first():
+        return jsonify({"error": "账号已存在"}), 409
+
+    user = User(
+        username=username,
+        password_hash=generate_password_hash(data.get('password')),
+        nickname=(data.get('nickname') or username).strip(),
+        is_admin=bool(data.get('is_admin'))
+    )
+    db.session.add(user)
+    db.session.commit()
+    return jsonify(serialize_user(user, include_admin_fields=True))
+
+@app.route('/api/admin/users/<int:user_id>', methods=['PUT'])
+@admin_required
+def update_user(admin_user, user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({"error": "用户不存在"}), 404
+
+    data = request.json or {}
+    if 'username' in data:
+        username, username_error = validate_username(data.get('username'))
+        if username_error:
+            return jsonify({"error": username_error}), 400
+        existing = User.query.filter(User.username == username, User.id != user.id).first()
+        if existing:
+            return jsonify({"error": "账号已存在"}), 409
+        user.username = username
+
+    if 'nickname' in data:
+        user.nickname = (data.get('nickname') or user.username or '').strip()
+
+    if 'is_admin' in data:
+        next_is_admin = bool(data.get('is_admin'))
+        if user.id == admin_user.id and not next_is_admin:
+            return jsonify({"error": "不能取消当前登录管理员的管理员权限"}), 400
+        user.is_admin = next_is_admin
+
+    db.session.commit()
+    return jsonify(serialize_user(user, include_admin_fields=True))
+
+@app.route('/api/admin/users/<int:user_id>/password', methods=['PATCH'])
+@admin_required
+def reset_user_password(admin_user, user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({"error": "用户不存在"}), 404
+
+    data = request.json or {}
+    password_error = validate_password(data.get('password'))
+    if password_error:
+        return jsonify({"error": password_error}), 400
+
+    user.password_hash = generate_password_hash(data.get('password'))
+    db.session.commit()
+    return jsonify({"status": "success"})
+
+@app.route('/api/admin/users/<int:user_id>', methods=['DELETE'])
+@admin_required
+def delete_user(admin_user, user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({"error": "用户不存在"}), 404
+    if user.id == admin_user.id:
+        return jsonify({"error": "不能删除当前登录管理员"}), 400
+
+    Record.query.filter_by(user_id=user.id).delete()
+    db.session.delete(user)
     db.session.commit()
     return jsonify({"status": "success"})
 
